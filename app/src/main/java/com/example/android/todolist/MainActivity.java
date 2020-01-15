@@ -36,17 +36,20 @@ public class MainActivity extends AppCompatActivity {
 
         listView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
-            public void onItemClick(AdapterView<?> adapterView, View view, int position, long id) {
-            AlertDialog dialog = new AlertDialog.Builder(MainActivity.this)
-                    .setTitle("Delete task")
-                    .setPositiveButton("Yes", new DialogInterface.OnClickListener() {
-                        @Override
-                        public void onClick(DialogInterface dialogInterface, int i) {
-                            
-                        }
-                    })
-            }
-        });
+            public void onItemClick(AdapterView<?> adapterView, View view, final int position, long id) {
+                AlertDialog dialog = new AlertDialog.Builder(MainActivity.this)
+                        .setTitle("Delete task")
+                        .setPositiveButton("Yes", new DialogInterface.OnClickListener() {
+                            @Override
+                            public void onClick(DialogInterface dialogInterface, int i) {
+                                list.remove(position);
+                                adapter.setData(list);
+                            }
+                        })
+                        .setNegativeButton("No", null)
+                        .create();
+                        dialog.show();
+            }});
 
         final Button newTaskButton = findViewById(R.id.newTaskButton);
 
