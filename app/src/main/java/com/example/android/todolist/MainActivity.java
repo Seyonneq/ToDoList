@@ -13,6 +13,13 @@ import android.widget.EditText;
 import android.widget.ListView;
 import android.widget.TextView;
 
+import java.io.BufferedReader;
+import java.io.BufferedWriter;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
+import java.io.InputStreamReader;
+import java.io.OutputStreamWriter;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -30,6 +37,8 @@ public class MainActivity extends AppCompatActivity {
 
         final ListView listView = findViewById(R.id.listView);
         final TextAdapter adapter = new TextAdapter();
+
+        readTasks();
 
         adapter.setData(list);
         listView.setAdapter(adapter);
@@ -72,9 +81,52 @@ public class MainActivity extends AppCompatActivity {
                         .setNegativeButton("Cancel", null)
                         .create();
                 dialog.show();
-            }
-        });
+            }});
     }
+
+    @Override
+    protected void onPause(){
+        super.onPause();;
+        saveTasks();
+    }
+
+        private void saveTasks(){
+        try{
+            File saveFile = new File(this.getFilesDir(), "saved");
+
+            FileOutputStream FOut = new FileOutputStream(saveFile);
+            BufferedWriter writer = new BufferedWriter(new OutputStreamWriter(FOut));
+
+            for (int i = 0; i<list.size(); i++){
+                writer.write(list.get(i));
+                writer.newLine();;
+            }
+            FOut.close();
+            writer.close();
+        }
+        catch(Exception a){
+            a.printStackTrace();
+        }}
+
+        private void readTasks(){
+            File saveFile = new File(this.getFilesDir(), "readed");
+            if(!saveFile.exists()){
+                return;
+            }
+
+            try{
+                FileInputStream input = new FileInputStream(saveFile);
+                BufferedReader reader = new BufferedReader(new InputStreamReader(input));
+                String line = reader.readLine();
+                while(line!=null){
+                    list.add(line);
+                    line=reader.readLine();
+                }
+            }
+            catch (Exception a){
+                a.printStackTrace();
+            }
+            }
 
     class TextAdapter extends BaseAdapter{
 
