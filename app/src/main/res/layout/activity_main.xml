@@ -3,11 +3,25 @@
     android:orientation="vertical" android:layout_width="match_parent"
     android:layout_height="match_parent">
 
-    <Button
-        android:id="@+id/newTaskButton"
+    <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="50dp"
-        android:text="New Task"/>
+        android:orientation="horizontal">
+
+        <Button
+            android:id="@+id/newTaskButton"
+            android:layout_width="0dp"
+            android:layout_height="match_parent"
+            android:layout_weight="2"
+            android:text="@string/newTask"/>
+
+        <Button
+            android:id="@+id/deleteAllButton"
+            android:layout_width="0dp"
+            android:layout_height="match_parent"
+            android:layout_weight="1"
+            android:text="@string/deleteAll"/>
+</LinearLayout>
 
     <ListView
         android:id="@+id/listView"

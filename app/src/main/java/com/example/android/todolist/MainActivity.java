@@ -53,6 +53,7 @@ public class MainActivity extends AppCompatActivity {
                             public void onClick(DialogInterface dialogInterface, int i) {
                                 list.remove(position);
                                 adapter.setData(list);
+                                saveTasks();
                             }
                         })
                         .setNegativeButton("No", null)
@@ -76,18 +77,35 @@ public class MainActivity extends AppCompatActivity {
                         public void onClick(DialogInterface dialogInterface, int i) {
                             list.add(taskInput.getText().toString());
                             adapter.setData(list);
+                            saveTasks();
                         }
                     })
                         .setNegativeButton("Cancel", null)
                         .create();
                 dialog.show();
             }});
-    }
 
-    @Override
-    protected void onPause(){
-        super.onPause();;
-        saveTasks();
+        final Button deleteAllButton = findViewById(R.id.deleteAllButton);
+
+        deleteAllButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                AlertDialog dialog = new AlertDialog.Builder(MainActivity.this)
+                        .setTitle("Delete All Taska?")
+                        .setMessage("Are you sure?")
+                        .setPositiveButton("Delete All", new DialogInterface.OnClickListener() {
+                            @Override
+                            public void onClick(DialogInterface dialogInterface, int i) {
+                                list.clear();
+                                adapter.setData(list);
+                                saveTasks();
+                            }
+                        })
+                        .setNegativeButton("No!", null)
+                        .create();
+                dialog.show();
+            }
+        });
     }
 
         private void saveTasks(){
@@ -154,12 +172,14 @@ public class MainActivity extends AppCompatActivity {
 
         @Override
         public View getView(int position, View convertView, ViewGroup parent){
-            LayoutInflater inflater =(LayoutInflater)
-                    MainActivity.this.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
-            View rowView = inflater.inflate(R.layout.item, parent, false);
-            TextView textView = rowView.findViewById(R.id.task);
-            textView.setText(list.get(position));
-            return rowView;
-        }
+            if(convertView==null) {
+                LayoutInflater inflater = (LayoutInflater)
+                        MainActivity.this.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
+                convertView = inflater.inflate(R.layout.item, parent, false);
+            }
+                final TextView textView = convertView.findViewById(R.id.task);
+                textView.setText(list.get(position));
+                return convertView;
+            }
     }
 }
