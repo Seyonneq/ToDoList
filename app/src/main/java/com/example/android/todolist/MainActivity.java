@@ -2,6 +2,7 @@ package com.example.android.todolist;
 
 import android.content.Context;
 import android.content.DialogInterface;
+import android.graphics.Color;
 import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -29,6 +30,7 @@ import androidx.appcompat.app.AppCompatActivity;
 public class MainActivity extends AppCompatActivity {
 
     final List<String> list = new ArrayList<>();
+    int[] backgroundColors;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -38,9 +40,20 @@ public class MainActivity extends AppCompatActivity {
         final ListView listView = findViewById(R.id.listView);
         final TextAdapter adapter = new TextAdapter();
 
+        int maxTasks = 50;
+        backgroundColors = new int[maxTasks];
+
+        for (int i = 0; i<maxTasks; i++) {
+            if(i%2 == 0) {
+                backgroundColors[i] = Color.WHITE;
+            } else {
+                backgroundColors[i] = Color.GRAY;
+            }
+        }
+
         readTasks();
 
-        adapter.setData(list);
+        adapter.setData(list, backgroundColors);
         listView.setAdapter(adapter);
 
         listView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
@@ -52,7 +65,7 @@ public class MainActivity extends AppCompatActivity {
                             @Override
                             public void onClick(DialogInterface dialogInterface, int i) {
                                 list.remove(position);
-                                adapter.setData(list);
+                                adapter.setData(list, backgroundColors);
                                 saveTasks();
                             }
                         })
@@ -76,7 +89,7 @@ public class MainActivity extends AppCompatActivity {
                         @Override
                         public void onClick(DialogInterface dialogInterface, int i) {
                             list.add(taskInput.getText().toString());
-                            adapter.setData(list);
+                            adapter.setData(list, backgroundColors);
                             saveTasks();
                         }
                     })
@@ -97,7 +110,7 @@ public class MainActivity extends AppCompatActivity {
                             @Override
                             public void onClick(DialogInterface dialogInterface, int i) {
                                 list.clear();
-                                adapter.setData(list);
+                                adapter.setData(list, backgroundColors);
                                 saveTasks();
                             }
                         })
@@ -149,9 +162,16 @@ public class MainActivity extends AppCompatActivity {
     class TextAdapter extends BaseAdapter{
 
         List<String> list = new ArrayList<>();
-        void setData(List<String> mList){
+
+        int[] backgroundColors;
+
+        void setData(List<String> mList, int[] mBackgroundColors){
             list.clear();
             list.addAll(mList);
+            backgroundColors = new int[list.size()];
+            for(int i = 0; i<list.size(); i++){
+                backgroundColors[i] = mBackgroundColors[i];
+            }
             notifyDataSetChanged();
         }
 
@@ -177,8 +197,12 @@ public class MainActivity extends AppCompatActivity {
                         MainActivity.this.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
                 convertView = inflater.inflate(R.layout.item, parent, false);
             }
-                final TextView textView = convertView.findViewById(R.id.task);
-                textView.setText(list.get(position));
+
+            final TextView textView = convertView.findViewById(R.id.task);
+
+            textView.setText(list.get(position));
+            textView.setBackgroundColor(backgroundColors[position]);
+
                 return convertView;
             }
     }
