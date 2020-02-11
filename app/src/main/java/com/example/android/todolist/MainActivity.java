@@ -31,6 +31,7 @@ public class MainActivity extends AppCompatActivity {
 
     final List<String> list = new ArrayList<>();
     int[] backgroundColors;
+    int[] textColors;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -42,6 +43,7 @@ public class MainActivity extends AppCompatActivity {
 
         int maxTasks = 50;
         backgroundColors = new int[maxTasks];
+        textColors = new int[maxTasks];
 
         for (int i = 0; i<maxTasks; i++) {
             if(i%2 == 0) {
@@ -52,6 +54,12 @@ public class MainActivity extends AppCompatActivity {
         }
 
         readTasks();
+
+        for (int i = 0; i <list.size(); i++) {
+            if(list.get(i).startsWith("!")){
+                backgroundColors[i] = Color.RED;
+            }
+        }
 
         adapter.setData(list, backgroundColors);
         listView.setAdapter(adapter);
@@ -88,7 +96,36 @@ public class MainActivity extends AppCompatActivity {
                     .setPositiveButton("Add Task", new DialogInterface.OnClickListener() {
                         @Override
                         public void onClick(DialogInterface dialogInterface, int i) {
-                            list.add(taskInput.getText().toString());
+                            String task = taskInput.getText().toString();
+                            if(task.startsWith("!!")) {
+                                int taskCounter = list.size();
+                                list.add(" ");
+                                while (taskCounter > 0) {
+                                    list.set(taskCounter, list.get(taskCounter - 1));
+                                    backgroundColors[taskCounter] = backgroundColors[taskCounter - 1];
+                                    textColors[taskCounter] = textColors[taskCounter - 1];
+                                    taskCounter--;
+                                }
+                                list.set(0, task);
+                                backgroundColors[0] = Color.RED;
+                                textColors[0] = Color.BLACK;
+                            } else if (task.startsWith("!")) {
+                                int taskCounter = list.size();
+                                list.add(" ");
+                                int importantTasksCounter = 0;
+                                while (importantTasksCounter < taskCounter && list.get(importantTasksCounter).startsWith("!!")) {
+                                    importantTasksCounter++;
+                                }
+                                while (taskCounter >0) {
+                                    list.set(taskCounter, list.get(taskCounter - 1));
+                                    backgroundColors[taskCounter] = backgroundColors[taskCounter - 1];
+                                    textColors[taskCounter] = textColors[taskCounter - 1];
+                                    taskCounter--;
+                                }
+
+                            } else {
+                                list.add(task);
+                            }
                             adapter.setData(list, backgroundColors);
                             saveTasks();
                         }
