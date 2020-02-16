@@ -32,6 +32,11 @@ public class MainActivity extends AppCompatActivity {
     final List<String> list = new ArrayList<>();
     int[] backgroundColors;
     int[] textColors;
+    int[] selectedBackgroundColors;
+    int[] selectedTasks;
+    int selectedTasksCounter = 0;
+
+    boolean isSelected = false;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -44,36 +49,65 @@ public class MainActivity extends AppCompatActivity {
         int maxTasks = 50;
         backgroundColors = new int[maxTasks];
         textColors = new int[maxTasks];
+        selectedBackgroundColors = new int[maxTasks];
+        selectedTasks = new int[maxTasks];
 
         for (int i = 0; i<maxTasks; i++) {
             if(i%2 == 0) {
                 backgroundColors[i] = Color.WHITE;
+                textColors[i] = Color.BLACK;
+                selectedTasks[i] = -1;
             } else {
                 backgroundColors[i] = Color.GRAY;
+                textColors[i] = Color.BLACK;
+                selectedTasks[i] = -1;
             }
         }
 
         readTasks();
 
         for (int i = 0; i <list.size(); i++) {
-            if(list.get(i).startsWith("!")){
+            if(list.get(i).startsWith("!!")){
                 backgroundColors[i] = Color.RED;
+            }else if(list.get(i).startsWith("!")){
+                backgroundColors[i] = Color.CYAN;
             }
         }
 
-        adapter.setData(list, backgroundColors);
+        adapter.setData(list, backgroundColors, textColors);
         listView.setAdapter(adapter);
 
         listView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> adapterView, View view, final int position, long id) {
+                if(isSelected){
+                    int selectedTasksFound =0;
+                    int i =0;
+                    while (selectedTasksFound<selectedTasksCounter) {
+                        if(selectedTasks[i]==position){
+                            selectedBackgroundColors[position] = backgroundColors[position];
+                            adapter.setData(list, selectedBackgroundColors, textColors);
+                            selectedTasksCounter--;
+                            selectedTasks[i] = -1;
+                            if(selectedTasksCounter==0){
+                                isSelected =false;
+                            }
+                            return;
+                        }
+                        if(selectedTasks[i]!=-1){
+                            selectedTasksFound++;
+                        }
+                        i++;
+                    }
+                    return;
+                }
                 AlertDialog dialog = new AlertDialog.Builder(MainActivity.this)
                         .setTitle("Delete task")
                         .setPositiveButton("Yes", new DialogInterface.OnClickListener() {
                             @Override
                             public void onClick(DialogInterface dialogInterface, int i) {
                                 list.remove(position);
-                                adapter.setData(list, backgroundColors);
+                                adapter.setData(list, backgroundColors, textColors);
                                 saveTasks();
                             }
                         })
@@ -81,6 +115,23 @@ public class MainActivity extends AppCompatActivity {
                         .create();
                         dialog.show();
             }});
+
+        listView.setOnItemLongClickListener(new AdapterView.OnItemLongClickListener() {
+            @Override
+            public boolean onItemLongClick(AdapterView<?> adapterView, View view, int position, long l) {
+                for(int i = 0; i<list.size(); i++) {
+                    if(selectedBackgroundColors[i]!=Color.LTGRAY){
+                    selectedBackgroundColors[i]= backgroundColors[i];
+                }}
+                isSelected = true;
+                selectedTasks[selectedTasksCounter] = position;
+                selectedTasksCounter++;
+                selectedBackgroundColors[position]=Color.LTGRAY;
+                adapter.setData(list, selectedBackgroundColors, textColors);
+                return true;
+            }
+        }
+        );
 
         final Button newTaskButton = findViewById(R.id.newTaskButton);
 
@@ -113,20 +164,23 @@ public class MainActivity extends AppCompatActivity {
                                 int taskCounter = list.size();
                                 list.add(" ");
                                 int importantTasksCounter = 0;
-                                while (importantTasksCounter < taskCounter && list.get(importantTasksCounter).startsWith("!!")) {
+                                while (importantTasksCounter < taskCounter &&
+                                        list.get(importantTasksCounter).startsWith("!!")) {
                                     importantTasksCounter++;
                                 }
-                                while (taskCounter >0) {
+                                while (taskCounter > importantTasksCounter) {
                                     list.set(taskCounter, list.get(taskCounter - 1));
                                     backgroundColors[taskCounter] = backgroundColors[taskCounter - 1];
                                     textColors[taskCounter] = textColors[taskCounter - 1];
                                     taskCounter--;
                                 }
-
+                                list.set(importantTasksCounter, task);
+                                backgroundColors[0] = Color.CYAN;
+                                textColors[0] = Color.BLACK;
                             } else {
                                 list.add(task);
                             }
-                            adapter.setData(list, backgroundColors);
+                            adapter.setData(list, backgroundColors, textColors);
                             saveTasks();
                         }
                     })
@@ -147,7 +201,7 @@ public class MainActivity extends AppCompatActivity {
                             @Override
                             public void onClick(DialogInterface dialogInterface, int i) {
                                 list.clear();
-                                adapter.setData(list, backgroundColors);
+                                adapter.setData(list, backgroundColors, textColors);
                                 saveTasks();
                             }
                         })
@@ -167,7 +221,7 @@ public class MainActivity extends AppCompatActivity {
 
             for (int i = 0; i<list.size(); i++){
                 writer.write(list.get(i));
-                writer.newLine();;
+                writer.newLine();
             }
             FOut.close();
             writer.close();
@@ -202,12 +256,14 @@ public class MainActivity extends AppCompatActivity {
 
         int[] backgroundColors;
 
-        void setData(List<String> mList, int[] mBackgroundColors){
+        void setData(List<String> mList, int[] mBackgroundColors, int []mtextColors){
             list.clear();
             list.addAll(mList);
             backgroundColors = new int[list.size()];
+            textColors =  new int[list.size()];
             for(int i = 0; i<list.size(); i++){
                 backgroundColors[i] = mBackgroundColors[i];
+                textColors[i] = mtextColors[i];
             }
             notifyDataSetChanged();
         }
