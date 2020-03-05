@@ -5,5 +5,5 @@
     <!-- Tasks -->
     <string name="newTask">Add Task</string>
     <string name="deleteAll">Delete All</string>
-
+    <string name="deleteSelected">Delete Selected</string>
 </resources>
